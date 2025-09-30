@@ -19,11 +19,11 @@ const customerSchema = new Schema<ICustomer>(
       type: String,
       required: true,
     },
-    // address: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    // },
+    address: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
   { timestamps: true }
 );
