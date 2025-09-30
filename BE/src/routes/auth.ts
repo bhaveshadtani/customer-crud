@@ -1,9 +1,11 @@
 import express from "express";
-import { login, register } from "../controllers/auth";
+import { login, userDetails, register } from "../controllers/auth";
+import isVerified from "../middleware/isVerified";
 
 const router = express.Router();
 
-router.get("/register", register);
-router.get("/login", login);
+router.post("/register", register);
+router.post("/login", login);
+router.get("/me", isVerified, userDetails);
 
 export default router;

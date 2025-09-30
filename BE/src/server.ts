@@ -6,6 +6,7 @@ import helmet from "helmet";
 import mongoose from "mongoose";
 import auth from "./routes/auth";
 import customer from "./routes/customer";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
+app.use(cookieParser());
 
 // Rate Limiting
 const limiter = rateLimit({
