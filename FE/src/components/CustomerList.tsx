@@ -7,21 +7,24 @@ import useCustomerStore from "../store/useCustomerStore";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+
 const CustomerList: React.FC = () => {
   const { setSelectedCustomer } = useCustomerStore();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type?: "success" | "error" } | null>(null);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(3);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["customers"],
+    queryKey: ["customers", page, limit],
     queryFn: async () => {
       const res = await fetch(`${API_URL}/customer/customer-list`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ page: 1, limit: 10 })
+        body: JSON.stringify({ page, limit })
       });
       if (!res.ok) throw new Error("Failed to fetch customers");
       return res.json();
@@ -65,6 +68,7 @@ const CustomerList: React.FC = () => {
     }
   };
 
+
   if (isLoading) return <div className="flex justify-center items-center h-screen"><span className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></span></div>;
   if (error) return <div className="text-red-500 text-center mt-10">Error loading customers</div>;
 
@@ -79,7 +83,6 @@ const CustomerList: React.FC = () => {
         </button>
       </div>
       <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-xl shadow">
-
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-blue-700">Customer List</h2>
           <button
@@ -87,6 +90,17 @@ const CustomerList: React.FC = () => {
             onClick={() => { navigate('/add-customer'); setSelectedCustomer(null) }}
           >Add Customer</button>
         </div>
+
+        {/* Pagination Info */}
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <span className="font-semibold">Total Records:</span> {data.total}
+          </div>
+          <div>
+            <span className="font-semibold">Page:</span> {data.page} / {Math.ceil(data.total / limit)}
+          </div>
+        </div>
+
         <table className="w-full mb-6 border">
           <thead>
             <tr className="bg-blue-100">
@@ -120,6 +134,21 @@ const CustomerList: React.FC = () => {
             ))}
           </tbody>
         </table>
+
+        {/* Pagination Controls */}
+        <div className="flex justify-between items-center mb-6">
+          <button
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >Previous</button>
+          <button
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={page >= Math.ceil(data.total / limit)}
+          >Next</button>
+        </div>
+
         {/* Confirmation Popup */}
         {confirmId && (
           <div className="fixed inset-0 bg-gray-400 opacity-95 flex items-center justify-center z-50">
