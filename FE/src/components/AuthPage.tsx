@@ -3,6 +3,7 @@ import AuthForm from "./AuthForm";
 import Toast from "./Toast";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import useUserStore from "../store/useUserStore";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -39,15 +40,21 @@ const AuthPage: React.FC = () => {
     enabled: false
   });
 
+  const setUser = useUserStore((state) => state.setUser);
+
   useEffect(() => {
     if (data) {
+      // Store user in zustand store
+      if (data.user) {
+        setUser(data.user);
+      }
       setToast({ message: `${type === 'login' ? 'Login' : 'Register'} successful!`, type: "success" });
       setTimeout(() => navigate("/customers"), 1000);
     }
     if (error) {
       setToast({ message: (error as Error).message || "Network error", type: "error" });
     }
-  }, [data, error, type, navigate]);
+  }, [data, error, type, navigate, setUser]);
 
   const handleAuth = (email: string, password: string) => {
     setFormData({ email, password });
