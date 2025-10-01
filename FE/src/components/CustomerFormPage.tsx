@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import useCustomerStore from "../store/useCustomerStore";
+import { useNavigate, useParams } from "react-router-dom";
 import CustomerForm from "./CustomerForm";
 import Toast from "./Toast";
-import { useNavigate } from "react-router-dom";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
+import { useState } from "react";
 const CustomerFormPage: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type?: "success" | "error" } | null>(null);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { selectedCustomer, clearSelectedCustomer } = useCustomerStore();
+  const [toast, setToast] = useState<{ message: string; type?: "success" | "error" } | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (values: { name: string; address: string; phone: string }) => {
     setLoading(true);
@@ -18,12 +19,15 @@ const CustomerFormPage: React.FC = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(values)
+        body: JSON.stringify(
+          id ? { ...values, id } : values // Pass id if editing
+        ),
       });
       const data = await res.json();
       if (res.ok) {
-        setToast({ message: "Customer created successfully!", type: "success" });
-        setTimeout(() => navigate("/customers"), 1000);
+        setToast({ message: id ? "Customer updated!" : "Customer created!", type: "success" });
+        clearSelectedCustomer();
+        navigate("/customers")
       } else {
         setToast({ message: data.message || "Error", type: "error" });
       }
@@ -35,7 +39,17 @@ const CustomerFormPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
-      <CustomerForm onSubmit={handleSubmit} loading={loading} />
+      <CustomerForm
+        onSubmit={handleSubmit}
+        loading={loading}
+        initialValues={{
+          name: selectedCustomer?.name || "",
+          address: selectedCustomer?.address || "",
+          phone: selectedCustomer?.phone || "",
+        }}
+        isEditMode={Boolean(selectedCustomer)}
+      />
+
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );

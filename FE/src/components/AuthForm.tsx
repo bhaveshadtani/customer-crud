@@ -1,6 +1,5 @@
-
-
-import React from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
@@ -22,9 +21,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSubmit, loading, type }) => {
     onSubmit: ({ email, password }) => onSubmit(email, password),
   });
 
+  useEffect(() => {
+    formik.resetForm();
+  }, [type]);
+
   return (
     <form
-      className="max-w-sm mx-auto mt-10 p-8 bg-white rounded-xl shadow-lg"
+      className="max-w-sm mx-auto p-8 rounded-xl shadow-lg"
       onSubmit={formik.handleSubmit}
       noValidate
     >

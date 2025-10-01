@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthForm from "./AuthForm";
 import Toast from "./Toast";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +12,11 @@ const AuthPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<{ email: string; password: string } | null>(null);
+
+  // Reset formData when type changes
+  useEffect(() => {
+    setFormData(null);
+  }, [type]);
   const {
     data,
     error,
@@ -34,7 +39,7 @@ const AuthPage: React.FC = () => {
     enabled: false
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (data) {
       setToast({ message: `${type === 'login' ? 'Login' : 'Register'} successful!`, type: "success" });
       setTimeout(() => navigate("/customers"), 1000);
@@ -61,7 +66,7 @@ const AuthPage: React.FC = () => {
           onClick={() => setType('register')}
         >Register</button>
       </div>
-  <AuthForm onSubmit={handleAuth} loading={isFetching} type={type} />
+      <AuthForm onSubmit={handleAuth} loading={isFetching} type={type} />
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
